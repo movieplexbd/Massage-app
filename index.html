@@ -87,7 +87,7 @@
     </style>
 </head>
 <body>
-    <div class="username-input" id="username-container" style="display: none;">
+    <div class="username-input" id="username-input">
         <input type="text" id="username" placeholder="আপনার নাম লিখুন..." />
         <button id="set-username">নাম সেট করুন</button>
     </div>
@@ -104,7 +104,7 @@
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
     import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
-    
+
     const firebaseConfig = {
         apiKey: "AIzaSyBsz-82MDaibWnIBUpoykrZHyJW7UMedX8",
         authDomain: "movies-bee24.firebaseapp.com",
@@ -114,35 +114,24 @@
         messagingSenderId: "1080659811750",
         appId: "1:1080659811750:web:c1ef7d4dacc3ab17edc367"
     };
-    
+
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const messagesRef = ref(db, 'messages');
     const onlineUsersRef = ref(db, 'onlineUsers');
-    
+
     let username = '';
     
-    // Check if username exists
+    // Check if username is already set
     const checkUsername = () => {
-        const usernameInput = document.getElementById('username');
-        const usernameContainer = document.getElementById('username-container');
-
-        // Check if username is already set in the database
-        onValue(onlineUsersRef, (snapshot) => {
-            if (snapshot.exists()) {
-                usernameContainer.style.display = 'none';
-                username = Object.keys(snapshot.val())[0]; // Get the first username
-                setUserOnline(); // Set user online
-            } else {
-                usernameContainer.style.display = 'flex'; // Show username input
-            }
-        });
-    };
-
-    const setUserOnline = () => {
-        set(ref(onlineUsersRef, username), true);
-        document.getElementById('online-users').innerHTML += username + ' ';
+        const storedUsername = localStorage.getItem('username'); // Store username in local storage
+        if (storedUsername) {
+            username = storedUsername;
+            document.getElementById('username-input').style.display = 'none'; // Hide username input
+            // Set user online
+            set(ref(onlineUsersRef, username), true);
+        }
     };
 
     // Set username
@@ -152,8 +141,10 @@
         if (username) {
             usernameInput.disabled = true;
             usernameInput.placeholder = "নাম সেট করা হয়েছে";
-            setUserOnline();
-            document.getElementById('username-container').style.display = 'none'; // Hide username input
+            localStorage.setItem('username', username); // Store username in local storage
+            // Set user online
+            set(ref(onlineUsersRef, username), true);
+            document.getElementById('username-input').style.display = 'none'; // Hide username input
         }
     });
 
@@ -186,7 +177,7 @@
             <button class="delete-btn" data-id="${childSnapshot.key}">মুছুন</button>`;
             chatContainer.appendChild(messageElement);
         });
-
+        
         // Play notification sound
         document.getElementById('notification-sound').play();
         
@@ -226,7 +217,7 @@
         });
     });
 
-    // Check for existing username on load
+    // Check if username is already set on page load
     checkUsername();
     </script>
 </body>
