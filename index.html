@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>মেসেজিং ওয়েবসাইট</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            transition: background-color 0.5s;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #fff;
+            position: relative;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .message-time {
+            font-size: 0.8em;
+            color: #888;
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+        }
+        .message-input {
+            display: flex;
+            padding: 10px;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+        }
+        .message-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .message-input button {
+            margin-left: 10px;
+            padding: 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .username-input {
+            margin: 10px 0;
+            display: flex;
+        }
+        .username-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        .typing-indicator {
+            font-style: italic;
+            color: #888;
+        }
+        .online-users {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="username-input" id="username-container" style="display: none;">
+        <input type="text" id="username" placeholder="আপনার নাম লিখুন..." />
+        <button id="set-username">নাম সেট করুন</button>
+    </div>
+    <div class="online-users" id="online-users">অনলাইন: </div>
+    <div class="chat-container" id="chat-container"></div>
+    <div class="typing-indicator" id="typing-indicator" style="display: none;"></div>
+    <div class="message-input">
+        <input type="text" id="message" placeholder="আপনার বার্তা লিখুন..." />
+        <button id="send">পাঠান</button>
+    </div>
+    
+    <audio id="notification-sound" src="notification.mp3" preload="auto"></audio>
+    
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyBsz-82MDaibWnIBUpoykrZHyJW7UMedX8",
+        authDomain: "movies-bee24.firebaseapp.com",
+        databaseURL: "https://movies-bee24-default-rtdb.firebaseio.com",
+        projectId: "movies-bee24",
+        storageBucket: "movies-bee24.appspot.com",
+        messagingSenderId: "1080659811750",
+        appId: "1:1080659811750:web:c1ef7d4dacc3ab17edc367"
+    };
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const messagesRef = ref(db, 'messages');
+    const onlineUsersRef = ref(db, 'onlineUsers');
+    
+    let username = '';
+    
+    // Check if username exists
+    const checkUsername = () => {
+        const usernameInput = document.getElementById('username');
+        const usernameContainer = document.getElementById('username-container');
+
+        // Check if username is already set in the database
+        onValue(onlineUsersRef, (snapshot) => {
+            if (snapshot.exists()) {
+                usernameContainer.style.display = 'none';
+                username = Object.keys(snapshot.val())[0]; // Get the first username
+                setUserOnline(); // Set user online
+            } else {
+                usernameContainer.style.display = 'flex'; // Show username input
+            }
+        });
+    };
+
+    const setUserOnline = () => {
+        set(ref(onlineUsersRef, username), true);
+        document.getElementById('online-users').innerHTML += username + ' ';
+    };
+
+    // Set username
+    document.getElementById('set-username').addEventListener('click', () => {
+        const usernameInput = document.getElementById('username');
+        username = usernameInput.value.trim();
+        if (username) {
+            usernameInput.disabled = true;
+            usernameInput.placeholder = "নাম সেট করা হয়েছে";
+            setUserOnline();
+            document.getElementById('username-container').style.display = 'none'; // Hide username input
+        }
+    });
+
+    // Send message
+    document.getElementById('send').addEventListener('click', () => {
+        const messageInput = document.getElementById('message');
+        const message = messageInput.value.trim();
+        
+        if (message && username) {
+            const newMessageRef = ref(db, 'messages/' + Date.now());
+            set(newMessageRef, {
+                username: username,
+                text: message,
+                time: new Date().toLocaleTimeString()
+            });
+            messageInput.value = '';
+        }
+    });
+
+    // Listen for messages
+    onValue(messagesRef, (snapshot) => {
+        const chatContainer = document.getElementById('chat-container');
+        chatContainer.innerHTML = ''; // Clear previous messages
+        snapshot.forEach((childSnapshot) => {
+            const messageData = childSnapshot.val();
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+            messageElement.innerHTML = `<strong>${messageData.username}:</strong> ${messageData.text}
+            <span class="message-time">${messageData.time}</span>
+            <button class="delete-btn" data-id="${childSnapshot.key}">মুছুন</button>`;
+            chatContainer.appendChild(messageElement);
+        });
+
+        // Play notification sound
+        document.getElementById('notification-sound').play();
+        
+        chatContainer.scrollTop = chatContainer.scrollHeight; // Scroll to bottom
+    });
+
+    // Listen for typing
+    const messageInput = document.getElementById('message');
+    messageInput.addEventListener('input', () => {
+        if (username) {
+            // Show typing indicator
+            document.getElementById('typing-indicator').innerText = `${username} টাইপ করছে...`;
+            document.getElementById('typing-indicator').style.display = 'block';
+            
+            // Clear typing indicator after 2 seconds
+            setTimeout(() => {
+                document.getElementById('typing-indicator').style.display = 'none';
+            }, 2000);
+        }
+    });
+
+    // Delete message
+    document.getElementById('chat-container').addEventListener('click', (event) => {
+        if (event.target.classList.contains('delete-btn')) {
+            const messageId = event.target.getAttribute('data-id');
+            remove(ref(db, 'messages/' + messageId));
+        }
+    });
+
+    // Listen for online users
+    onValue(onlineUsersRef, (snapshot) => {
+        const onlineUsersContainer = document.getElementById('online-users');
+        onlineUsersContainer.innerHTML = 'অনলাইন: ';
+        snapshot.forEach((childSnapshot) => {
+            const username = childSnapshot.key;
+            onlineUsersContainer.innerHTML += username + ' ';
+        });
+    });
+
+    // Check for existing username on load
+    checkUsername();
+    </script>
+</body>
+</html>
