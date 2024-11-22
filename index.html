@@ -1,327 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Interface</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #111;
-            color: #fff;
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background-color: #222;
-            font-size: 14px;
-        }
-        
-        .app-name {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background-color: #333;
-        }
-        
-        .app-name h1 {
-            font-size: 24px;
-            color: #fff;
-        }
-        
-        .icons {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .chat-list {
-            padding: 10px;
-            overflow-y: auto;
-        }
-        
-        .chat {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid #444;
-            cursor: pointer;
-        }
-        
-        .profile-pic {
-            background-color: #555;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            color: #fff;
-        }
-        
-        .chat-info {
-            margin-left: 10px;
-            flex-grow: 1;
-        }
-        
-        .name {
-            font-weight: bold;
-            font-size: 16px;
-        }
-        
-        .message {
-            font-size: 14px;
-            color: #aaa;
-        }
-        
-        .message-time {
-            font-size: 12px;
-            color: #777;
-        }
-        
-        .bottom-nav {
-            display: flex;
-            justify-content: space-around;
-            padding: 10px;
-            background-color: #222;
-            border-top: 1px solid #444;
-            width: 100vw;
-            position: absolute;
-            bottom: 0;
-        }
-        
-        .bottom-nav span {
-            font-size: 16px;
-            color: #bbb;
-        }
-        
-        /* Chat window styling */
-        .chat-window {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            background-color: #222;
-            padding: 10px;
-        }
-        
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #444;
-        }
-        
-        .messages-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-        }
-        
-        .message-item {
-            background-color: #333;
-            padding: 8px;
-            margin-bottom: 5px;
-            border-radius: 5px;
-        }
-        
-        .message-input {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            background-color: #111;
-        }
-        
-        .message-input input {
-            flex: 1;
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            margin-right: 10px;
-            color: #fff;
-            background-color: #333;
-        }
-        
-        .message-input button {
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            background-color: #007bff;
-            color: #fff;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Login & Signup</title>
+  <style>
+    /* Basic CSS styles for form and layout */
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f7f7f7;
+    }
+    .container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .form-switch {
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-    <div class="app-name">
-        <h1>WhatsApp</h1>
-        <div class="icons">
-            <span class="camera">📸</span>
-            <span class="search">🔍</span>
-            <span class="menu">⋮</span>
-        </div>
+  <div class="container">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button onclick="login()">Login</button>
+    <div class="form-switch">
+      <p>Don't have an account? <a href="#" onclick="toggleSignup()">Sign Up</a></p>
     </div>
+  </div>
 
-    <div class="chat-list">
-        <!-- Chat Items dynamically added here -->
+  <div class="container" id="signupContainer" style="display: none;">
+    <h2>Sign Up</h2>
+    <input type="email" id="signupEmail" placeholder="Email" required>
+    <input type="password" id="signupPassword" placeholder="Password" required>
+    <button onclick="signup()">Sign Up</button>
+    <div class="form-switch">
+      <p>Already have an account? <a href="#" onclick="toggleLogin()">Login</a></p>
     </div>
+  </div>
 
-    <div class="bottom-nav">
-        <span>Chats</span>
-        <span>Updates</span>
-        <span>Communities</span>
-        <span>Calls</span>
-    </div>
-    
-    <div class="chat-window">
-        <div class="chat-header">
-            <span class="chat-with">Chat with <span id="chatUserName"></span></span>
-            <button onclick="closeChat()">Close</button>
-        </div>
-        <div class="messages-list" id="messagesList"></div>
-        <div class="message-input">
-            <input type="text" id="messageInput" placeholder="Type a message">
-            <button onclick="sendMessage()">Send</button>
-        </div>
-    </div>
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyBsz-82MDaibWnIBUpoykrZHyJW7UMedX8",
-            authDomain: "movies-bee24.firebaseapp.com",
-            databaseURL: "https://movies-bee24-default-rtdb.firebaseio.com",
-            projectId: "movies-bee24",
-            storageBucket: "movies-bee24.appspot.com",
-            messagingSenderId: "1080659811750",
-            appId: "1:1080659811750:web:c1ef7d4dacc3ab17edc367"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const database = getDatabase(app);
+  <script type="module">
+    // Import Firebase SDK modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        function updateUserStatus(userId, isOnline) {
-            update(ref(database, `users/${userId}`), {
-                online: isOnline,
-                lastSeen: isOnline ? Date.now() : null
-            });
-        }
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBsz-82MDaibWnIBUpoykrZHyJW7UMedX8",
+      authDomain: "movies-bee24.firebaseapp.com",
+      databaseURL: "https://movies-bee24-default-rtdb.firebaseio.com",
+      projectId: "movies-bee24",
+      storageBucket: "movies-bee24.appspot.com",
+      messagingSenderId: "1080659811750",
+      appId: "1:1080659811750:web:c1ef7d4dacc3ab17edc367"
+    };
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                const userId = user.uid;
-                updateUserStatus(userId, true);
-                window.addEventListener("beforeunload", () => {
-                    updateUserStatus(userId, false);
-                });
-                loadChatUsers();
-            }
-        });
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        function loadChatUsers() {
-            const chatList = document.querySelector(".chat-list");
-            const usersRef = ref(database, "users");
+    // Switch between Login and Signup forms
+    function toggleSignup() {
+      document.querySelector('.container').style.display = 'none';
+      document.getElementById('signupContainer').style.display = 'block';
+    }
 
-            onValue(usersRef, (snapshot) => {
-                chatList.innerHTML = "";
-                snapshot.forEach((childSnapshot) => {
-                    const userData = childSnapshot.val();
-                    const isOnline = userData.online ? "🟢" : "🔴";
-                    
-                    const chatItem = document.createElement("div");
-                    chatItem.classList.add("chat");
-                    chatItem.innerHTML = `
-                        <div class="profile-pic">👤</div>
-                        <div class="chat-info">
-                            <span class="name">${userData.name || "Unknown User"} ${isOnline}</span>
-                            <span class="message">Last seen: ${userData.lastSeen ? new Date(userData.lastSeen).toLocaleString() : "N/A"}</span>
-                        </div>
-                    `;
-                    chatItem.onclick = () => openChat(childSnapshot.key, userData.name || "Unknown User");
-                    chatList.appendChild(chatItem);
-                });
-            });
-        }
+    function toggleLogin() {
+      document.querySelector('.container').style.display = 'block';
+      document.getElementById('signupContainer').style.display = 'none';
+    }
 
-        let currentChatUserId = null;
+    // Signup Function
+    async function signup() {
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        alert("User Created Successfully");
+      } catch (error) {
+        console.error(error);
+        alert(error.message);
+      }
+    }
 
-        function openChat(userId, userName) {
-            currentChatUserId = userId;
-            document.getElementById("chatUserName").innerText = userName;
-            document.querySelector(".chat-window").style.display = "flex";
-            document.querySelector(".app-name").style.display = "none";
-            document.querySelector(".chat-list").style.display = "none";
-            document.querySelector(".bottom-nav").style.display = "none";
-            loadMessages();
-        }
-
-        function closeChat() {
-            document.querySelector(".chat-window").style.display = "none";
-            document.querySelector(".app-name").style.display = "flex";
-            document.querySelector(".chat-list").style.display = "block";
-            document.querySelector(".bottom-nav").style.display = "flex";
-            currentChatUserId = null;
-        }
-
-        function loadMessages() {
-            const messagesList = document.getElementById("messagesList");
-            messagesList.innerHTML = "";
-            if (!currentChatUserId) return;
-            const currentUserId = auth.currentUser.uid;
-            const chatRoomId = currentUserId < currentChatUserId 
-                ? `${currentUserId}_${currentChatUserId}`
-                : `${currentChatUserId}_${currentUserId}`;
-
-            const messagesRef = ref(database, `chats/${chatRoomId}`);
-            onValue(messagesRef, (snapshot) => {messagesList.innerHTML = "";  // Clear previous messages
-            snapshot.forEach((childSnapshot) => {
-            const messageData = childSnapshot.val();
-            const messageItem = document.createElement("div");
-            messageItem.classList.add("message-item");
-            messageItem.textContent = `${messageData.senderName}: ${messageData.message}`;
-            messagesList.appendChild(messageItem);
-            });
-            messagesList.scrollTop = messagesList.scrollHeight; // Auto-scroll to the latest message
-            });
-            }
-            
-            function sendMessage() {
-            const messageInput = document.getElementById("messageInput");
-            const message = messageInput.value.trim();
-            if (message === "" || !currentChatUserId) return;
-            
-            const currentUserId = auth.currentUser.uid;
-            const chatRoomId = currentUserId < currentChatUserId 
-            ? `${currentUserId}_${currentChatUserId}`
-            : `${currentChatUserId}_${currentUserId}`;
-            
-            const messagesRef = ref(database, `chats/${chatRoomId}`);
-            const newMessageRef = push(messagesRef);
-            
-            newMessageRef.set({
-            senderId: currentUserId,
-            senderName: auth.currentUser.displayName || "Anonymous",
-            message: message,
-            timestamp: Date.now()
-            }).then(() => {
-            messageInput.value = "";  // Clear input field after sending
-            }).catch((error) => {
-            console.error("Error sending message:", error);
-            });
-            }
-            </script>
-            </body>
-            </html>
+    // Login Function
+    async function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        alert("Login Successful");
+      } catch (error) {
+        console.error(error);
+        alert(error.message);
+      }
+    }
+  </script>
+</body>
+</html>
